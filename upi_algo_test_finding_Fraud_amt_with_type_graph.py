@@ -246,7 +246,15 @@ new_transaction_df = pd.DataFrame([new_transaction])
 combined_data = pd.concat([historical_data, new_transaction_df])
 
 def detect_behavioral_anomalies(data):
-    distances = pairwise_distances(data, data)
+    # Keep only numeric columns
+    numeric_data = data.select_dtypes(include=[np.number])
+    
+    # Handle NaNs (fill with 0 or column mean)
+    numeric_data = numeric_data.fillna(0)   # option 1: replace NaN with 0
+    # numeric_data = numeric_data.fillna(numeric_data.mean())  # option 2: replace with mean
+    
+    # Compute pairwise distances
+    distances = pairwise_distances(numeric_data, numeric_data)
     anomalies = np.where(distances > np.percentile(distances, 95), 1, 0)
     return anomalies
 
@@ -262,3 +270,4 @@ plt.ylabel('Values')
 plt.title('Behavioral Analysis of Transactions')
 plt.legend()
 plt.show()
+
